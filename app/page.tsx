@@ -2,8 +2,16 @@
 
 import { useEffect, useState } from 'react'
 
+// 덱 데이터의 타입을 정의합니다.
+interface Deck {
+  id: string | number
+  category?: string
+  title: string
+  description?: string
+}
+
 export default function Home() {
-  const [decks, setDecks] = useState([])
+  const [decks, setDecks] = useState<Deck[]>([])
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -27,8 +35,13 @@ export default function Home() {
 
         const data = await response.json()
         setDecks(data || [])
-      } catch (err) {
-        setErrorMessage(err.message || String(err))
+      } catch (err: unknown) {
+        // err 타입을 안전하게 처리
+        if (err instanceof Error) {
+          setErrorMessage(err.message)
+        } else {
+          setErrorMessage(String(err))
+        }
       } finally {
         setLoading(false)
       }
