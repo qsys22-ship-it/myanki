@@ -18,7 +18,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchDecksDirectly() {
       try {
-        const supabaseUrl = 'https://ypeiixbxmpjubkqjiew.supabase.co'
+        const supabaseUrl = 'https://ypeiixbxmprjubkqjiew.supabase.co'
         const supabaseKey = 'sb_publishable_f3KIOc59edOm1Ro03BVBhW_Y1E-dzTQ'
 
         // Supabase REST API로 직접 요청 (라이브러리 충돌 우회)
