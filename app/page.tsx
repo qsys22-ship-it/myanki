@@ -19,7 +19,7 @@ export default function Home() {
     async function fetchDecksDirectly() {
       try {
         const supabaseUrl = 'https://ypeiixbxmprjubkqjiew.supabase.co'
-        const supabaseKey = 'sb_publishable_f3KIoC59edOm1Ro03BVBhW_Y1E-dzTQ'
+        const supabaseKey = 'sb_publishable_f3KIoC59edOm1Ro03BVBhw_Y1E-dzTQ'
 
         // Supabase REST API로 직접 요청 (라이브러리 충돌 우회)
         const response = await fetch(`${supabaseUrl}/rest/v1/decks?select=*`, {
