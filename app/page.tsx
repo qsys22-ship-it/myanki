@@ -23,11 +23,10 @@ export default function Home() {
 
         // Supabase REST API로 직접 요청 (라이브러리 충돌 우회)
         const response = await fetch(`${supabaseUrl}/rest/v1/decks?select=*`, {
-          headers: {
-            'apikey': supabaseKey,
-            'Authorization': `Bearer ${supabaseKey}`
-          }
-        })
+  headers: {
+    'apikey': supabaseKey
+  }
+})
 
         if (!response.ok) {
           throw new Error(`서버 응답 에러: ${response.status}`)
