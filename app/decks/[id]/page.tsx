@@ -1,5 +1,5 @@
 import Link from 'next/link'
-
+export const instant = false
 type Deck = {
   id: number | string
   title: string
