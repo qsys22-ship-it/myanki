@@ -147,7 +147,11 @@ export default function Home() {
                   <span className="inline-block rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">{deck.category || '기타'}</span>
                   <h3 className="mt-4 text-lg font-bold text-gray-900">{deck.title}</h3>
                   <p className="mt-2 line-clamp-3 text-sm leading-6 text-gray-600">{deck.description || '덱 설명이 아직 등록되지 않았어요.'}</p>
-                  <div className="mt-5 border-t border-gray-100 pt-3 text-xs text-gray-400">상세 보기와 다운로드 기능은 준비 중이에요.</div>
+                 <div className="mt-5 border-t border-gray-100 pt-3">
+  <a href={`/decks/${encodeURIComponent(String(deck.id))}`} className="text-sm font-semibold text-blue-600 hover:text-blue-800">
+    덱 상세 보기 →
+  </a>
+</div>
                 </article>
               ))}
             </div>
