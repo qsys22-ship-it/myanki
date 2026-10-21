@@ -6,7 +6,12 @@ type Deck = {
   description?: string | null
   category?: string | null
 }
-
+type PreviewImage = {
+  id: string
+  deck_id: string
+  storage_path: string
+  display_order: number
+}
 type PageProps = {
   params: Promise<{ id: string }>
 }
@@ -18,6 +23,8 @@ const supabaseKey = 'sb_publishable_f3KIoC59edOm1Ro03BVBhw_Y1E-dzTQ'
 export default async function DeckDetailPage({ params }: PageProps) {
   const { id } = await params
   let deck: Deck | null = null
+  let previewImages: PreviewImage[] = []
+  let previewUrls: string[] = []
   let error = ''
 
   try {
@@ -34,6 +41,51 @@ export default async function DeckDetailPage({ params }: PageProps) {
     if (!response.ok) throw new Error(`서버 응답 오류: ${response.status}`)
     const data: Deck[] = await response.json()
     deck = data[0] ?? null
+    if (deck) {
+  const previewsUrl = new URL(`${supabaseUrl}/rest/v1/deck_preview_images`)
+  previewsUrl.searchParams.set('select', 'id,deck_id,storage_path,display_order')
+  previewsUrl.searchParams.set('deck_id', `eq.${id}`)
+  previewsUrl.searchParams.set('order', 'display_order.asc')
+  previewsUrl.searchParams.set('limit', '5')
+
+  const previewsResponse = await fetch(previewsUrl.toString(), {
+    headers: { apikey: supabaseKey },
+    cache: 'no-store',
+  })
+
+  if (previewsResponse.ok) {
+    previewImages = (await previewsResponse.json()) as PreviewImage[]
+    if (previewImages.length > 0) {
+  const signedResponse = await fetch(
+    `${supabaseUrl}/storage/v1/object/sign/deck-previews`,
+    {
+      method: 'POST',
+      headers: {
+        apikey: supabaseKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        paths: previewImages.map((image) => image.storage_path),
+        expiresIn: 3600,
+      }),
+      cache: 'no-store',
+    }
+  )
+
+  if (signedResponse.ok) {
+    const signed = (await signedResponse.json()) as {
+      signedURL?: string
+    }[]
+
+    previewUrls = signed.flatMap((item) =>
+      item.signedURL
+        ? [`${supabaseUrl}/storage/v1${item.signedURL}`]
+        : []
+    )
+  }
+}
+  }
+}
   } catch (err) {
     error = err instanceof Error ? err.message : '알 수 없는 오류가 발생했어요.'
   }
@@ -70,12 +122,28 @@ export default async function DeckDetailPage({ params }: PageProps) {
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
               <h2 className="text-lg font-bold">덱 미리보기</h2>
-              <div className="mt-4 flex min-h-48 items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-center">
-                <div>
-                  <p className="font-medium text-gray-700">미리보기 준비 중</p>
-                  <p className="mt-2 text-sm text-gray-500">추후 대표 이미지와 최대 5장의 미리보기를 제공할 예정이에요.</p>
-                </div>
-              </div>
+               {previewUrls.length > 0 ? (
+  <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+    {previewUrls.map((url, index) => (
+      <img
+        key={url}
+        src={url}
+        alt={`${deck.title} 미리보기 ${index + 1}`}
+        className="max-h-96 w-full rounded-xl border border-gray-200 bg-gray-50 object-contain"
+        loading="lazy"
+      />
+    ))}
+  </div>
+) : (
+  <div className="mt-4 flex min-h-48 items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-center">
+    <div>
+      <p className="font-medium text-gray-700">미리보기 준비 중</p>
+      <p className="mt-2 text-sm text-gray-500">
+        등록된 미리보기 이미지가 아직 없어요.
+      </p>
+    </div>
+  </div>
+)}
             </section>
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
