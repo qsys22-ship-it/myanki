@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PreviewSlider from "./PreviewSlider";
 export const instant = false
 type Deck = {
   id: number | string
@@ -122,28 +123,7 @@ export default async function DeckDetailPage({ params }: PageProps) {
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
               <h2 className="text-lg font-bold">덱 미리보기</h2>
-               {previewUrls.length > 0 ? (
-  <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-    {previewUrls.map((url, index) => (
-      <img
-        key={url}
-        src={url}
-        alt={`${deck.title} 미리보기 ${index + 1}`}
-        className="max-h-96 w-full rounded-xl border border-gray-200 bg-gray-50 object-contain"
-        loading="lazy"
-      />
-    ))}
-  </div>
-) : (
-  <div className="mt-4 flex min-h-48 items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-center">
-    <div>
-      <p className="font-medium text-gray-700">미리보기 준비 중</p>
-      <p className="mt-2 text-sm text-gray-500">
-        등록된 미리보기 이미지가 아직 없어요.
-      </p>
-    </div>
-  </div>
-)}
+              <PreviewSlider images={previewUrls} title={deck.title} />
             </section>
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
