@@ -129,14 +129,17 @@ export default async function DeckDetailPage({ params }: PageProps) {
 
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
               <h2 className="text-lg font-bold">덱 다운로드</h2>
-              <p className="mt-2 text-sm text-gray-600"> 현재는 기능 테스트용 영단어 10개 덱을 무료로 제공합니다.
-  정식 영단어 1000개 덱은 추후 등록될 예정입니다.</p>
+             <p className="mt-2 text-sm text-gray-600">
+  {deck.file_url
+    ? "이 덱의 Anki 파일(.apkg)을 다운로드할 수 있습니다."
+    : "아직 다운로드 파일이 등록되지 않았습니다."}
+</p>
               {deck.file_url ? (
   <a
     href={deck.file_url}
     className="mt-5 inline-block rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
   >
-    테스트 덱 다운로드 (.apkg)
+    덱 다운로드 (.apkg)
   </a>
 ) : (
   <button
