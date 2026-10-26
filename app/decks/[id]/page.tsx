@@ -6,6 +6,7 @@ type Deck = {
   title: string
   description?: string | null
   category?: string | null
+  file_url?: string | null
 }
 type PreviewImage = {
   id: string
@@ -30,7 +31,7 @@ export default async function DeckDetailPage({ params }: PageProps) {
 
   try {
     const url = new URL(`${supabaseUrl}/rest/v1/decks`)
-    url.searchParams.set('select', 'id,title,description,category')
+    url.searchParams.set('select', 'id,title,description,category,file_url')
     url.searchParams.set('id', `eq.${id}`)
     url.searchParams.set('limit', '1')
 
@@ -130,9 +131,9 @@ export default async function DeckDetailPage({ params }: PageProps) {
               <h2 className="text-lg font-bold">덱 다운로드</h2>
               <p className="mt-2 text-sm text-gray-600"> 현재는 기능 테스트용 영단어 10개 덱을 무료로 제공합니다.
   정식 영단어 1000개 덱은 추후 등록될 예정입니다.</p>
-              {id === "7f94b1d3-997b-4974-87d2-f3f0863ef9dc" ? (
+              {deck.file_url ? (
   <a
-    href="https://ypeiixbxmprjubkqjiew.supabase.co/storage/v1/object/public/apkg-files/7f94b1d3-997b-4974-87d2-f3f0863ef9dc/myanki_english_test_10.apkg"
+    href={deck.file_url}
     className="mt-5 inline-block rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
   >
     테스트 덱 다운로드 (.apkg)
