@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import AuthNav from "./AuthNav"
 
 type Deck = {
   id: string | number
@@ -91,6 +92,7 @@ export default function Home() {
             <a href="#categories" className="hover:text-blue-600">카테고리</a>
             <a href="https://docs.ankiweb.net/" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">안키 가이드 ↗</a>
             <a href="https://apps.ankiweb.net/" target="_blank" rel="noopener noreferrer" className="rounded-lg bg-blue-50 px-3 py-2 text-blue-700 hover:bg-blue-100">안키 설치 ↗</a>
+            <AuthNav />
           </nav>
         </div>
       </header>
