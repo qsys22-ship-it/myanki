@@ -25,7 +25,11 @@ export default function LoginPage() {
     supabase.auth.getUser()
       .then(({ data }) => {
         if (active) {
-          setUserEmail(data.user?.email ?? null)
+          if (data.user) {
+  router.replace("/")
+} else {
+  setUserEmail(null)
+}
         }
       })
       .catch(() => {
@@ -38,7 +42,7 @@ export default function LoginPage() {
     return () => {
       active = false
     }
-  }, [])
+  }, [router])
 
   async function handleLogin(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
