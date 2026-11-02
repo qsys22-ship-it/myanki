@@ -193,6 +193,14 @@ export default function LoginPage() {
                   className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-blue-500"
                 />
               </div>
+              <div className="text-right">
+  <Link
+    href="/forgot-password"
+    className="text-sm font-medium text-blue-600 hover:underline"
+  >
+    비밀번호를 잊으셨나요?
+  </Link>
+</div>
 
               {error && (
                 <p
