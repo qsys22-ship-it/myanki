@@ -129,23 +129,44 @@ useEffect(() => {
     )
   }
 
-  return (
+   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Link
-        href="/account"
-        className="rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100"
-      >
-        {nickname || "내 계정"}
-      </Link>
+      <details className="group relative">
+        <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 [&::-webkit-details-marker]:hidden">
+          <span aria-hidden="true">👤</span>
 
-      <button
-        type="button"
-        onClick={handleLogout}
-        disabled={loading}
-        className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 disabled:opacity-60"
-      >
-        {loading ? "처리 중..." : "로그아웃"}
-      </button>
+          <span className="max-w-32 truncate">
+            {nickname || "내 계정"}
+          </span>
+
+          <span
+            aria-hidden="true"
+            className="text-xs text-gray-400"
+          >
+            ▼
+          </span>
+        </summary>
+
+        <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
+          <Link
+            href="/account"
+            className="block rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+          >
+            마이페이지
+          </Link>
+
+          <div className="my-1 border-t border-gray-100" />
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loading}
+            className="block w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-60"
+          >
+            {loading ? "처리 중..." : "로그아웃"}
+          </button>
+        </div>
+      </details>
 
       {error && (
         <span role="alert" className="text-xs text-red-600">
