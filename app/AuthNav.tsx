@@ -100,7 +100,7 @@ export default function AuthNav() {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Link
-        href="/login"
+        href="/account"
         className="rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100"
       >
         내 계정
