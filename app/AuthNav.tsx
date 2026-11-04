@@ -11,6 +11,7 @@ const supabase = createClient(
 
 export default function AuthNav() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [nickname, setNickname] = useState("")
   const [checking, setChecking] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -47,7 +48,38 @@ export default function AuthNav() {
       subscription.unsubscribe()
     }
   }, [])
+useEffect(() => {
+  let active = true
 
+  async function loadNickname() {
+    setNickname("")
+
+    if (!userEmail) return
+
+    const { data: { user }, error: authError } =
+      await supabase.auth.getUser()
+
+    if (!active || authError || !user) return
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("nickname")
+      .eq("id", user.id)
+      .maybeSingle()
+
+    if (active && !error) {
+      setNickname(data?.nickname ?? "")
+    }
+  }
+
+  void loadNickname().catch(() => {
+    if (active) setNickname("")
+  })
+
+  return () => {
+    active = false
+  }
+}, [userEmail])
   async function handleLogout() {
     setLoading(true)
     setError("")
@@ -103,7 +135,7 @@ export default function AuthNav() {
         href="/account"
         className="rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100"
       >
-        내 계정
+        {nickname || "내 계정"}
       </Link>
 
       <button
