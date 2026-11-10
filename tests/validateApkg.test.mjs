@@ -210,3 +210,40 @@ test("비정상적인 압축 크기 거부", () => {
 
 // 실제 데이터 무결성 및 악성 파일 검사는
 // 후속 단계에서 추가할 예정입니다.
+//
+// 실제 MyAnki 테스트 덱 검사
+//
+
+const realApkg = readFileSync(
+  new URL(
+    "./myanki_english_test_10%20(1).apkg",
+    import.meta.url
+  )
+);
+
+test("실제 MyAnki 영단어 덱 통과", () => {
+  const result = validateApkg(
+    realApkg,
+    "myanki_english_test_10 (1).apkg"
+  );
+
+  assert.deepEqual(result, {
+    valid: true,
+    format: "legacy",
+    fileCount: 2,
+  });
+});
+
+test("실제 덱의 ZIP 끝부분 손상 거부", () => {
+  const damaged = Buffer.from(realApkg);
+
+  damaged.writeUInt32LE(
+    0,
+    damaged.length - 22
+  );
+
+  expectedReject(
+    damaged,
+    "myanki_english_test_10 (1).apkg"
+  );
+});
