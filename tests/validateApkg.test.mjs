@@ -247,3 +247,27 @@ test("실제 덱의 ZIP 끝부분 손상 거부", () => {
     "myanki_english_test_10 (1).apkg"
   );
 });
+//
+// ZIP 내부 데이터 무결성 테스트
+//
+
+test("ZIP 내부 데이터 변조 거부", () => {
+  const damaged = Buffer.from(standard());
+
+  // media 파일의 실제 데이터 위치 찾기
+  const mediaDataPosition = damaged.indexOf(
+    Buffer.from("{}")
+  );
+
+  assert.notEqual(
+    mediaDataPosition,
+    -1,
+    "테스트용 media 데이터를 찾을 수 없습니다."
+  );
+
+  // ZIP 헤더는 유지하고 실제 데이터만 변경
+  damaged[mediaDataPosition] ^= 0x01;
+
+  // CRC32가 일치하지 않으므로 거부해야 함
+  expectedReject(damaged);
+});
