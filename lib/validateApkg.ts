@@ -1,3 +1,4 @@
+import { inflateRawSync } from "node:zlib";
 import "server-only";
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
@@ -18,7 +19,21 @@ export type ApkgValidationResult =
 function reject(reason: string): ApkgValidationResult {
   return { valid: false, reason };
 }
+function crc32(data: Uint8Array): number {
+  let crc = 0xffffffff;
 
+  for (const byte of data) {
+    crc ^= byte;
+
+    for (let i = 0; i < 8; i++) {
+      crc =
+        (crc >>> 1) ^
+        ((crc & 1) !== 0 ? 0xedb88320 : 0);
+    }
+  }
+
+  return (crc ^ 0xffffffff) >>> 0;
+}
 export function validateApkg(
   bytes: Buffer,
   fileName: string
@@ -176,7 +191,38 @@ export function validateApkg(
     if (localName !== name) {
       return reject("ZIP 내부 파일명이 일치하지 않습니다.");
     }
+   // 압축 데이터를 실제로 해제하고 CRC32 검사
+    const expectedCrc = bytes.readUInt32LE(position + 16);
 
+    const compressedData = bytes.subarray(
+      dataStart,
+      dataStart + compressed
+    );
+
+    let actualData: Buffer;
+
+    try {
+      if (method === 0) {
+        if (compressed !== uncompressed) {
+          return reject("ZIP 파일 크기가 일치하지 않습니다.");
+        }
+
+        actualData = compressedData;
+      } else {
+        actualData = inflateRawSync(compressedData, {
+          maxOutputLength: uncompressed + 1,
+        });
+      }
+    } catch {
+      return reject("ZIP 압축 데이터가 손상되었습니다.");
+    }
+
+    if (
+      actualData.length !== uncompressed ||
+      crc32(actualData) !== expectedCrc
+    ) {
+      return reject("ZIP 데이터 무결성 검사에 실패했습니다.");
+    }
     names.add(name);
     sizes.set(name, uncompressed);
     position = next;
