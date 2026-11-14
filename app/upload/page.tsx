@@ -37,7 +37,9 @@ export default function UploadPage() {
   const [category, setCategory] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [agreed, setAgreed] = useState(false);
-
+const [uploading, setUploading] = useState(false);
+const [uploadError, setUploadError] = useState("");
+  const [uploadSuccess, setUploadSuccess] = useState("");
   useEffect(() => {
     let active = true;
 
@@ -58,7 +60,107 @@ export default function UploadPage() {
     file !== null &&
     file.name.toLowerCase().endsWith(".apkg") &&
     file.size <= 50 * 1024 * 1024;
+async function handleUpload() {
+  if (uploading) return;
 
+  setUploadError("");
+
+  if (!validFile || !file || title.trim().length < 2 || !category || !agreed) {
+    setUploadError("제목, 카테고리, 파일, 저작권 동의를 확인해 주세요.");
+    return;
+  }
+
+  setUploading(true);
+
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+
+    if (error || !session?.access_token) {
+      setUploadError("로그인 정보가 만료되었습니다. 다시 로그인해 주세요.");
+      return;
+    }
+
+    const prepareResponse = await fetch("/api/upload/prepare", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${session.access_token}`,
+  },
+  body: JSON.stringify({
+    title: title.trim(),
+    description: description.trim(),
+    category,
+    fileName: file.name,
+    fileSize: file.size,
+    copyrightConfirmed: agreed,
+  }),
+});
+
+const prepareData = await prepareResponse.json();
+
+if (
+  !prepareResponse.ok ||
+  !prepareData.uploadId ||
+  !prepareData.path ||
+  !prepareData.token
+) {
+  throw new Error(
+    prepareData.error || "업로드 준비 요청에 실패했습니다."
+  );
+}
+
+const { error: storageError } = await supabase.storage
+  .from("apkg-pending")
+  .uploadToSignedUrl(
+    prepareData.path,
+    prepareData.token,
+    file,
+    {
+      contentType: "application/octet-stream",
+    }
+  );
+
+if (storageError) {
+  throw new Error(
+    storageError.message || "덱 파일 전송에 실패했습니다."
+  );
+}
+
+const completeResponse = await fetch("/api/upload/complete", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${session.access_token}`,
+  },
+  body: JSON.stringify({
+    uploadId: prepareData.uploadId,
+  }),
+});
+
+const completeData = await completeResponse.json();
+
+if (!completeResponse.ok || completeData.valid !== true) {
+  throw new Error(
+    completeData.error ||
+    completeData.reason ||
+    completeData.message ||
+    "덱 파일 검사에 실패했습니다."
+  );
+}
+setUploadSuccess(
+  "안키 덱 파일 형식 검사를 통과했습니다. 공개 전 추가 검토가 필요합니다."
+);
+// 다음 단계에서 검사 성공 안내 추가
+  } catch (error) {
+  setUploadError(
+    error instanceof Error
+      ? error.message
+      : "덱 업로드 중 오류가 발생했습니다."
+  );
+  } finally {
+    setUploading(false);
+  }
+}
   if (checking) {
     return (
       <main className="mx-auto max-w-3xl px-5 py-20 text-center text-gray-500">
@@ -205,6 +307,14 @@ export default function UploadPage() {
             >
               안전한 업로드 기능 준비 중
             </button>
+            {uploadSuccess && (
+  <p
+    role="status"
+    className="mt-3 text-center text-sm font-medium text-green-700"
+  >
+    {uploadSuccess}
+  </p>
+)}
             <p className="mt-3 text-center text-xs text-gray-500">
               현재는 화면 테스트 단계입니다. 파일이 서버로 전송되지 않습니다.
             </p>
