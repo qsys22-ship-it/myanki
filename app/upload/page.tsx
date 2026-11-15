@@ -302,10 +302,11 @@ setUploadSuccess(
           <div>
             <button
               type="button"
-              disabled
-              className="w-full cursor-not-allowed rounded-xl bg-gray-300 px-5 py-3.5 font-bold text-gray-600"
+              onClick={handleUpload}
+              disabled={uploading || !validFile || title.trim().length < 2 || !category || !agreed}
+              className="w-full rounded-xl bg-blue-600 px-5 py-3.5 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600"
             >
-              안전한 업로드 기능 준비 중
+              {uploading ? "업로드 및 검사 중..." : "덱 업로드 및 검사하기"}
             </button>
             {uploadSuccess && (
   <p
@@ -316,8 +317,9 @@ setUploadSuccess(
   </p>
 )}
             <p className="mt-3 text-center text-xs text-gray-500">
-              현재는 화면 테스트 단계입니다. 파일이 서버로 전송되지 않습니다.
-            </p>
+  업로드된 덱은 비공개 상태로 파일 형식 검사를 받으며,
+  검사에 통과하더라도 즉시 공개되지 않습니다.
+</p>
           </div>
         </div>
       </div>
