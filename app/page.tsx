@@ -57,7 +57,7 @@ export default function Home() {
         // 현재 작동 중인 Supabase 공개 연결을 유지합니다.
         const supabaseUrl = 'https://ypeiixbxmprjubkqjiew.supabase.co'
         const supabaseKey = 'sb_publishable_f3KIoC59edOm1Ro03BVBhw_Y1E-dzTQ'
-        const response = await fetch(`${supabaseUrl}/rest/v1/decks?select=*`, {
+        const response = await fetch(`${supabaseUrl}/rest/v1/decks?select=*&is_published=eq.true`, {
           headers: { apikey: supabaseKey },
         })
         if (!response.ok) throw new Error(`서버 응답 오류: ${response.status}`)
@@ -145,16 +145,29 @@ export default function Home() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {visibleDecks.map(deck => (
-                <article key={deck.id} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md">
-                  <span className="inline-block rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">{deck.category || '기타'}</span>
-                  <h3 className="mt-4 text-lg font-bold text-gray-900">{deck.title}</h3>
-                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-gray-600">{deck.description || '덱 설명이 아직 등록되지 않았어요.'}</p>
-                 <div className="mt-5 border-t border-gray-100 pt-3">
-  <a href={`/decks/${encodeURIComponent(String(deck.id))}`} className="text-sm font-semibold text-blue-600 hover:text-blue-800">
-    덱 상세 보기 →
-  </a>
-</div>
-                </article>
+               <a
+  key={deck.id}
+  href={`/decks/${encodeURIComponent(String(deck.id))}`}
+  className="block rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+>
+  <span className="inline-block rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
+    {deck.category || "기타"}
+  </span>
+
+  <h3 className="mt-4 text-lg font-bold text-gray-900">
+    {deck.title}
+  </h3>
+
+  <p className="mt-2 line-clamp-3 text-sm leading-6 text-gray-600">
+    {deck.description || "덱 설명이 아직 등록되지 않았어요."}
+  </p>
+
+  <div className="mt-5 border-t border-gray-100 pt-3">
+    <span className="text-sm font-semibold text-blue-600">
+      덱 상세 보기 →
+    </span>
+  </div>
+</a>
               ))}
             </div>
           )}
