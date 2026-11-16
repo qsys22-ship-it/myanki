@@ -33,6 +33,7 @@ export default async function DeckDetailPage({ params }: PageProps) {
     const url = new URL(`${supabaseUrl}/rest/v1/decks`)
     url.searchParams.set('select', 'id,title,description,category,file_url')
     url.searchParams.set('id', `eq.${id}`)
+    url.searchParams.set('is_published', 'eq.true')
     url.searchParams.set('limit', '1')
 
     const response = await fetch(url.toString(), {
