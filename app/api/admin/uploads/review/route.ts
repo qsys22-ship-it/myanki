@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "../../../../../lib/supabaseAdmin";
 import { validateApkg } from "../../../../../lib/validateApkg";
 
-export const runtime = "nodejs";
+
 
 function reply(data: Record<string, unknown>, status = 200) {
   return NextResponse.json(data, {
