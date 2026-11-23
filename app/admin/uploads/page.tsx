@@ -78,6 +78,57 @@ export default function AdminUploadsPage() {
   useEffect(() => {
     void loadUploads();
   }, [loadUploads]);
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
+
+  async function reviewUpload(
+    uploadId: string,
+    action: "approve" | "reject"
+  ) {
+    if (reviewingId) return;
+
+    const actionName = action === "approve" ? "승인" : "반려";
+
+    if (!window.confirm(`이 덱을 ${actionName}하시겠습니까?`)) {
+      return;
+    }
+
+    setReviewingId(uploadId);
+
+    try {
+      const { data, error: sessionError } =
+        await supabase.auth.getSession();
+
+      if (sessionError || !data.session?.access_token) {
+        throw new Error("관리자 계정으로 로그인해 주세요.");
+      }
+
+      const response = await fetch("/api/admin/uploads/review", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${data.session.access_token}`,
+        },
+        body: JSON.stringify({ uploadId, action }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || `${actionName} 처리에 실패했습니다.`);
+      }
+
+      window.alert(result.message || `${actionName}되었습니다.`);
+      await loadUploads();
+    } catch (error) {
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "처리 중 오류가 발생했습니다."
+      );
+    } finally {
+      setReviewingId(null);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-[#F3F4F6] px-4 py-10 text-gray-900">
@@ -194,6 +245,27 @@ export default function AdminUploadsPage() {
                         </p>
                       )}
                     </div>
+                    {upload.status === "format_checked" && (
+  <div className="mt-5 flex flex-wrap gap-3 border-t border-gray-100 pt-4">
+    <button
+      type="button"
+      onClick={() => void reviewUpload(upload.id, "approve")}
+      disabled={reviewingId !== null}
+      className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      {reviewingId === upload.id ? "처리 중..." : "승인하고 공개"}
+    </button>
+
+    <button
+      type="button"
+      onClick={() => void reviewUpload(upload.id, "reject")}
+      disabled={reviewingId !== null}
+      className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      {reviewingId === upload.id ? "처리 중..." : "반려"}
+    </button>
+  </div>
+)}
                   </article>
                 ))}
               </div>
