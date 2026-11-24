@@ -36,6 +36,7 @@ export default function UploadPage() {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [agreed, setAgreed] = useState(false);
 const [uploading, setUploading] = useState(false);
 const [uploadError, setUploadError] = useState("");
@@ -263,7 +264,32 @@ setUploadSuccess(
             <label htmlFor="deck-file" className="mb-2 block font-semibold text-gray-800">
               안키 덱 파일 <span className="text-red-500">*</span>
             </label>
-            <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-5">
+            <div
+  className={`rounded-xl border-2 border-dashed p-5 transition-colors ${
+    isDragging
+      ? "border-blue-500 bg-blue-50"
+      : "border-gray-200 bg-gray-50"
+  }`}
+  onDragOver={(e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+    setIsDragging(true);
+  }}
+  onDragLeave={() => {
+    setIsDragging(false);
+  }}
+  onDrop={(e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFile = e.dataTransfer.files[0] ?? null;
+    if (droppedFile) {
+      setFile(droppedFile);
+    }
+  }}
+>
+              <p className="mb-3 text-center text-sm font-medium text-blue-700">
+  📂 안키 덱 파일을 여기에 끌어다 놓으세요
+</p>
               <input
                 id="deck-file"
                 type="file"
