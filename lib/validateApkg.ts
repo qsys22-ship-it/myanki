@@ -143,7 +143,24 @@ export function validateApkg(
     ) {
       return reject("ZIP 내부 파일 경로가 허용되지 않습니다.");
     }
+// Anki 패키지에서 허용하는 ZIP 내부 파일명 검사
+    const allowedAnkiFiles = [
+      "meta",
+      "media",
+      "collection.anki2",
+      "collection.anki21",
+      "collection.anki21b",
+    ];
 
+    const isAnkiFile =
+      allowedAnkiFiles.includes(name) ||
+      /^(0|[1-9]\d*)$/.test(name);
+
+    if (!isAnkiFile) {
+      return reject(
+        "Anki 패키지에 허용되지 않은 파일이 포함되어 있습니다."
+      );
+    }
     if ((flags & 1) !== 0 || (method !== 0 && method !== 8)) {
       return reject("암호화 또는 지원하지 않는 압축 방식입니다.");
     }
@@ -190,6 +207,26 @@ export function validateApkg(
 
     if (localName !== name) {
       return reject("ZIP 내부 파일명이 일치하지 않습니다.");
+    }
+    // 중앙 디렉터리와 실제 ZIP 헤더 정보 비교
+    const localFlags = bytes.readUInt16LE(localOffset + 6);
+    const localCrc = bytes.readUInt32LE(localOffset + 14);
+    const localCompressed = bytes.readUInt32LE(localOffset + 18);
+    const localUncompressed = bytes.readUInt32LE(localOffset + 22);
+
+    if (localFlags !== flags) {
+      return reject("ZIP 압축 옵션이 일치하지 않습니다.");
+    }
+
+    // 데이터 디스크립터를 사용하지 않는 ZIP의 크기 및 CRC 확인
+    if ((flags & 0x0008) === 0) {
+      if (
+        localCrc !== bytes.readUInt32LE(position + 16) ||
+        localCompressed !== compressed ||
+        localUncompressed !== uncompressed
+      ) {
+        return reject("ZIP 파일 헤더 정보가 일치하지 않습니다.");
+      }
     }
    // 압축 데이터를 실제로 해제하고 CRC32 검사
     const expectedCrc = bytes.readUInt32LE(position + 16);
