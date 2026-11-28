@@ -332,7 +332,7 @@ setUploadSuccess(
               disabled={uploading || !validFile || title.trim().length < 2 || !category || !agreed}
               className="w-full rounded-xl bg-blue-600 px-5 py-3.5 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600"
             >
-              {uploading ? "업로드 및 검사 중..." : "덱 업로드 및 검사하기"}
+              {uploading ? "업로드 중..." : "덱 업로드"}
             </button>
             {uploadError && (
   <div
