@@ -65,7 +65,7 @@ async function handleUpload() {
   if (uploading) return;
 
   setUploadError("");
-
+setUploadSuccess("");
   if (!validFile || !file || title.trim().length < 2 || !category || !agreed) {
     setUploadError("제목, 카테고리, 파일, 저작권 동의를 확인해 주세요.");
     return;
@@ -334,6 +334,14 @@ setUploadSuccess(
             >
               {uploading ? "업로드 및 검사 중..." : "덱 업로드 및 검사하기"}
             </button>
+            {uploadError && (
+  <div
+    role="alert"
+    className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm font-medium text-red-700"
+  >
+    {uploadError}
+  </div>
+)}
             {uploadSuccess && (
   <p
     role="status"
